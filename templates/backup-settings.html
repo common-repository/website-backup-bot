@@ -1,0 +1,23 @@
+<form class="  rounded-5  p-5 form-check-code needs-validation" novalidate>
+<div class="form-check">
+  {% if SETTINGS.backup_wp_db == 1 %}
+  <input class="form-check-input" type="checkbox" checked id="flexCheckDefault">
+  <label class="form-check-label" for="flexCheckDefault">
+      Backup WordPress Database? 
+  {% endif %}
+  {% if SETTINGS.backup_wp_db == 0 %}
+  <input class="form-check-input" type="checkbox" id="flexCheckDefault">
+  <label class="form-check-label" for="flexCheckDefault">
+      Backup WordPress Database? 
+  {% endif %}
+
+    </label>
+</div>
+
+<button type="button" class="btn btn-primary-color mt-3" id="update-settings">Save</button>
+</div>
+<div>
+
+</div>
+</form>
+

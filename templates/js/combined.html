@@ -1,0 +1,373 @@
+jQuery(document).ready(function ($) {
+// This does the ajax request
+//connect-account script
+    $("#check-code").click(function (e) {
+        e.preventDefault();
+        $("#check-code").prop("disabled", true);
+        $.ajax({
+            url: "{{AJAX_URL}}",
+            method: "POST",
+            data: {
+                'action': 'wbb_register',
+                'nonce': "{{NONCE}}",
+                'code': $("#activationCode").val(),
+                'host:': "{{SITE_URL}}"
+            },
+            success: function (data, textStatus, res) {
+
+                console.log(data);
+                const obj = JSON.parse(data);
+
+                if (obj.body === 'error') {
+                    $("#check-code").prop("disabled", false);
+                    Swal.fire({
+                        html: `There is no user related with that code found.`,
+                        confirmButtonText: 'Accept',
+                        icon: 'error',
+                        padding: '1rem',
+                        grow: 'row',
+                        timer: 3000,
+                        timerProgressBar: true,
+// backdrop: true,
+                        toast: true,
+                        position: 'bottom',
+                        closeClick: false,
+                        showConfirmButton: false,
+                        showCancelButton: false,
+                        showCloseButton: false,
+                        closeButtonAriaLabel: 'Close this alert',
+
+                        customClass: {
+                            content: 'content-class'
+                        }
+                    });
+                } else {
+                    var user = JSON.parse(obj.body);
+                    console.log(user);
+                    Swal.fire({
+                        toast: true,
+                        icon: 'success',
+                        title: 'Pairing account! Please wait...',
+                        animation: false,
+                        position: 'bottom',
+                        showConfirmButton: false,
+                        timer: 4000,
+                        timerProgressBar: true,
+                        didOpen: () => {
+                            Swal.showLoading()
+                        }
+                    })
+
+
+                    setTimeout(function () {
+                        $.ajax({
+                            url: "{{AJAX_URL}}",
+                            method: "POST",
+                            data: {
+                                'action': 'wbb_save_code',
+                                'code': $("#activationCode").val(),
+                                'username': user.account.USERNAME,
+                                'project_id': user.account.PROJECT_ID,
+
+
+                                'database_credentials': user.project.database_credentials,
+                                'website_credentials': user.project.website_credentials,
+                                'host': user.project.host,
+                                'name': user.project.name,
+                                'status': user.project.status,
+                                'usage': user.project.usage,
+                                'user': user.project.user,
+
+
+                            },
+                            success: function (data) {
+// This outputs the result of the ajax request
+                                console.log(data);
+                                const obj = JSON.parse(data);
+
+//   setTimeout(function () {
+
+                                $('#cloudStatusModal').css('display', 'block');
+                                $('#cloudAttentionModal').css('display', 'none');
+
+                                $('#account-name').text(obj.account);
+                                $('#wbbModalLogin').removeClass("show");
+                                $('.modal-backdrop').removeClass("show");
+                                $('#connectAccountButton').prop('disabled', true);
+                                Swal.fire({
+                                    html: ' Account successfully connected',
+                                    confirmButtonText: 'Accept',
+                                    icon: 'info',
+                                    padding: '1rem',
+                                    grow: 'row',
+                                    toast: true,
+                                    position: 'bottom',
+                                    showConfirmButton: false,
+                                    showCancelButton: false,
+                                    showCloseButton: false,
+                                    closeButtonAriaLabel: 'Close this alert',
+
+                                    customClass: {
+                                        content: 'content-class'
+                                    }
+                                })
+                                setTimeout(function () {
+                                    location.reload();
+                                }, 2500);
+
+                            },
+                        });
+                    }, 2500);
+                }
+            },
+            error: function (errorThrown) {
+                console.log('error!');
+                console.log(errorThrown);
+                alert('there was an error')
+                $("#check-code").prop("disabled", false);
+            }
+        });
+    });
+
+//backup-settings script
+    $("#update-settings").click(function (e) {
+        e.preventDefault();
+        var backupDb = $('#flexCheckDefault').is(':checked');
+        var backupRoot = $('#flexCheckDefault2').is(':checked');
+
+        backupDb === true ? backupDb = 1 : backupDb = 0
+        backupRoot === true ? backupRoot = 1 : backupRoot = 0
+
+        $.ajax({
+            url: "{{AJAX_URL}}",
+            method: "POST",
+            data: {
+                'action': 'wbb_update_settings',
+                'nonce': "{{NONCE}}",
+                'backup_wp_db': backupDb,
+                'backup_files_root': backupRoot,
+            },
+            success: function (data, textStatus, res) {
+
+                console.log(data);
+                const obj = JSON.parse(data);
+                if (obj.body === 'error') {
+                    Swal.fire({
+                        html: `There is no user related with that code found.`,
+                        confirmButtonText: 'Accept',
+                        icon: 'error',
+                        padding: '1rem',
+                        grow: 'row',
+                        timer: 3000,
+                        timerProgressBar: true,
+                        toast: true,
+                        position: 'bottom',
+                        closeClick: false,
+                        showConfirmButton: false,
+                        showCancelButton: false,
+                        showCloseButton: false,
+                        closeButtonAriaLabel: 'Close this alert',
+
+                        customClass: {
+                            content: 'content-class'
+                        }
+                    });
+                }
+                alert('saved')
+            },
+            error: function (errorThrown) {
+            }
+        });
+    });
+
+//first js block wbb-ui
+    setTimeout(function () {
+        $('#preloaderbody').fadeOut();// or fade, css //display however you'd like.
+    }, 2000);
+
+    codeCheck();
+
+    function codeCheck() {
+        $.ajax({
+            url: "{{AJAX_URL}}",
+            method: "GET",
+            data: {
+                'action': 'wbb_check_data',
+// 'nonce': "{{NONCE}}"
+            },
+            success: function (data, textStatus, res) {
+                const obj = JSON.parse(data);
+
+                if (obj.body === 'THERE IS NO CODE') {
+                    $('#backupNowModal').css('display', 'none');
+                } else {
+                    $('#cloudStatusModal').css('display', 'block');
+                    $('#cloudAttentionModal').css('display', 'none');
+                    $('#connectAccountButton').prop('disabled', true);
+                    $('#cloud-status').text('Connected');
+                    $('#cloud-status').css('color', 'green');
+                    $("#cloud-sync-time").text((new Date()).toLocaleString());
+                    $("#cloud-account-code").text(obj.body.code);
+                    $("#cloud-project-id").text(obj.body.project_id);
+                }
+
+            },
+            error: function (errorThrown) {
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    setTimeout(function () {
+        var currentCode = $('#cloud-account-code').text();
+        var currentProject = $('#cloud-project-id').text();
+
+        $.ajax({
+            url: "{{AJAX_URL}}",
+            method: "POST",
+            data: {
+                'action': 'wbb_update_data',
+                'nonce': "{{NONCE}}",
+                'code': currentProject
+            },
+            success: function (data) {
+                const obj = JSON.parse(data);
+                const meta = JSON.parse(obj.body.USER_INFO_META[0].meta_value);
+                $("#cloud-account-name").text(obj.body.USER_INFO.email);
+                $("#projectStatus").text(obj.body.PROJECT_INFO.status);
+                $("#cloud-account-total").text(meta.storage);
+// $("#cloud-account-total").text(obj.body.TOTAL);
+                $("#cloud-account-usage").text(obj.body.USAGE + " / " + meta.storage);
+// $("#cloud-account-usage").text(obj.body.USAGE+" / "+obj.body.TOTAL);
+                $("#cloud-account-progress-bar").html(obj.body.PROGRESS_BAR);
+                Swal.fire({
+                    html: `<img src="{{THEME_URL}}/img/wbbhead.png" alt="">     Welcome Back!`,
+                    confirmButtonText: 'Accept',
+                    padding: '1rem',
+                    grow: 'row',
+                    backdrop: true,
+                    toast: true,
+                    timer: 5000,
+                    position: 'bottom',
+                    closeClick: false,
+                    showConfirmButton: false,
+                    showCancelButton: false,
+                    showCloseButton: false,
+                    closeButtonAriaLabel: 'Close this alert',
+
+                    customClass: {
+                        content: 'content-class'
+                    }
+                });
+            },
+            error: function (errorThrown) {
+                console.log('Error looking for update');
+                console.log(errorThrown);
+            }
+        });
+
+
+    }, 2500);
+
+//2nd js block wbb-ui
+    $('#doBackup').click(function () {
+        $('#backupLoader').css('display', 'block');
+        $("#doBackup").prop("disabled", true);
+//change for something more visible
+// $('#backupStatus').text("Running");
+
+// This does the ajax request
+        $.ajax({
+            url: "{{AJAX_URL}}",
+            method: "POST",
+            data: {
+                'action': 'wbb_backup',
+                'nonce': "{{NONCE}}"
+            },
+            success: function (data) {
+                console.log(data)
+// This outputs the result of the ajax request
+// const obj = JSON.parse(data);
+// console.log(obj.body);
+// $('#backupStatus').text("Idle");
+                $('.loader').css('display', 'none');
+                setTimeout(function () {
+                    location.reload();
+                }, 200);
+            },
+            error: function (errorThrown) {
+                console.log(errorThrown);
+            }
+        });
+    });
+//3rd js block wbb-ui
+    $('.downloadBackup').click(function () {
+        $('.downloadBackup').css('display', 'block');
+        $(".downloadBackup").prop("disabled", true);
+        var row = $(this).closest('tr');
+// console.log(row)
+        var filename = row.find('.filename');
+        var file = filename.text()
+        file = file.replace(/\s/g, '');
+        var link = document.createElement('a');
+        link.href = `{{THEME_URL}}/cache/${file}`;
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(function () {
+            $(".downloadBackup").prop("disabled", false);
+        }, 4000);
+
+    })
+//4rth js block wbb-ui
+    $('.deleteBackup').click(function () {
+        $('.deleteBackup').css('display', 'block');
+        $(".deleteBackup").prop("disabled", true);
+
+        var row = $(this).closest('tr');
+// console.log(row)
+        var filename = row.find('.filename');
+        var file = filename.text()
+        console.log(file)
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "{{AJAX_URL}}",
+                    method: "POST",
+                    data: {
+                        'action': 'wbb_backup_delete',
+                        'nonce': "{{NONCE}}",
+                        'filename': file,
+                    },
+                    success: function (data) {
+// $('.loader').css('display','none');
+                        Swal.fire(
+                            'Deleted!',
+                            'Your file has been deleted.',
+                            'success'
+                        )
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1000);
+                    },
+                    error: function (errorThrown) {
+                        console.log(errorThrown);
+                    }
+                });
+
+            }
+        })
+
+    });
+
+
+});
+
+

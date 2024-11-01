@@ -1,0 +1,46 @@
+<div class="modal fade" id="wbbModalLogin" tabindex="-1" aria-labelledby="wbbModalLabel" aria-hidden="true"
+  style="display: none;">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="wbbModalLabel">
+          Connect Your Account
+        </h5>
+        <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form class="  rounded-5  p-5 form-check-code needs-validation" novalidate>
+        <div class="modal-body">
+          {{BAK_PATH}}
+
+
+          <!-- Key input -->
+          <div class="form-outline mb-4">
+            <input type="text" id="idUser" value="20" hidden>
+            <input type="text" id="activationCode" class="form-control" required>
+            <label class="form-label" for="activationCode" style="margin-left: 0px;">Activation Code</label>
+            <!-- <div class="valid-feedback">Looks good!</div> -->
+            <div class="invalid-feedback">Please provide a valid activation code.</div>
+            <div class="form-notch">
+              <div class="form-notch-leading" style="width: 9px;"></div>
+              <div class="form-notch-middle" style="width: 64.8px;"></div>
+              <div class="form-notch-trailing"></div>
+            </div>
+          </div>
+          <div class="col text-center mt-2">
+            <!-- Simple link -->
+            <span>Dont have an account?</span>
+            <a target="_blank" href="{{VENDOR_SITE_URL}}/login"> Sign Up!</a>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" data-mdb-dismiss="modal">
+            Close
+          </button>
+          <button id="check-code" type="submit" class="btn btn-primary-color">
+            Check Code
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
